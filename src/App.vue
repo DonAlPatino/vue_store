@@ -1,21 +1,18 @@
 <script lang="ts">
-  // Заменяем
-  // import { useSettingsStore } from './stores/settings'
-  // на
-  import { useStorage } from '@vueuse/core'
+  // import { ref } from 'vue' — Удаляем
+  // import type { Theme } from './types/Theme.js' — Удаляем
+
+  // Добавляем импорт базы и функции observableQuery
+  import { sdb } from './db.ts'
+  import observableQuery from './helpers/observableQuery.ts'
   import SettingsForm from './components/SettingsForm.vue'
 </script>
 <script setup lang="ts">
-  // Заменяем
-  // const settingsStore = useSettingsStore()
-  // на
-  const state = useStorage('settings-storage', { theme: 'light' })
+  // const theme = ref('light') — Заменяем на:
+  const theme = observableQuery(async () => (await sdb.settings.get(1))?.theme)
 </script>
 <template>
-  <!-- Заменяем -->
-  <!-- <div :class="settingsStore.theme" class="envelope"> -->
-  <!-- На -->
-  <div :class="state.theme" class="envelope">
+  <div :class="theme" class="envelope">
     <SettingsForm />
   </div>
 </template>

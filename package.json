@@ -10,7 +10,8 @@
     "test": "vitest run --dom"
   },
   "dependencies": {
-    "@vueuse/core": "^12.7.0",
+    "@vueuse/rxjs": "^12.7.0",
+    "dexie": "^4.0.11",
     "vue": "^3.5.13"
   },
   "devDependencies": {
