@@ -5,4 +5,7 @@ export const useSettingsStore = defineStore('counter', () => {
   const theme = ref('light')
 
   return { theme }
-})
+},
+{
+  persist: true,
+},)
