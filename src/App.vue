@@ -1,12 +1,21 @@
 <script lang="ts">
-  import { useSettingsStore } from './stores/settings'
+  // Заменяем
+  // import { useSettingsStore } from './stores/settings'
+  // на
+  import { useStorage } from '@vueuse/core'
   import SettingsForm from './components/SettingsForm.vue'
 </script>
 <script setup lang="ts">
-  const settingsStore = useSettingsStore()
+  // Заменяем
+  // const settingsStore = useSettingsStore()
+  // на
+  const state = useStorage('settings-storage', { theme: 'light' })
 </script>
 <template>
-  <div :class="settingsStore.theme" class="envelope">
+  <!-- Заменяем -->
+  <!-- <div :class="settingsStore.theme" class="envelope"> -->
+  <!-- На -->
+  <div :class="state.theme" class="envelope">
     <SettingsForm />
   </div>
 </template>

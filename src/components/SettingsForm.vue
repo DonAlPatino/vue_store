@@ -1,12 +1,22 @@
 <script lang="ts">
-  import { useSettingsStore } from '../stores/settings' // — Добавляем
+  // Заменяем
+  // import { useSettingsStore } from '../stores/settings' // — Добавляем
+  // На
+  // Для реактивной работы с LocalStorage нам потребуется функция useStorage из пакета @vueuse/core
+  import { useStorage } from '@vueuse/core' // — Добавляем
   import type { Theme } from '../types/Theme.js'
 </script>
 <script setup lang="ts">
-  const settingsStore = useSettingsStore()
+  // Заменяем
+  // const settingsStore = useSettingsStore()
+  // На
+  const state = useStorage('settings-storage', { theme: ''}) // Добавляем State в LocalStorage
 
   const changeTheme = (theme?: Theme) => {
-    settingsStore.theme = theme || 'light'
+    // Заменяем
+    // settingsStore.theme = theme
+    // На
+    state.value.theme = theme || 'light'
   }
 </script>
 
