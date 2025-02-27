@@ -10,7 +10,7 @@
   // Заменяем
   // const settingsStore = useSettingsStore()
   // На
-  const state = useStorage('settings-storage', { theme: ''}) // Добавляем State в LocalStorage
+  const state = useStorage('settings-storage', { theme: 'light'}) // Добавляем State в LocalStorage
 
   const changeTheme = (theme?: Theme) => {
     // Заменяем
