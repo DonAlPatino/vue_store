@@ -1,57 +1,71 @@
-import { vi, expect, describe, beforeEach, afterEach, it } from 'vitest'
+import { expect, describe, beforeEach, afterEach, it } from 'vitest'
 import { render, fireEvent, cleanup } from '@testing-library/vue'
 import SettingsForm from './SettingsForm.vue'
+import { SettingsDatabase, dbsInit } from '../db.ts'
+
+const waitForDbUpdate = async (db: SettingsDatabase) => {
+  await db.transaction('rw', db.settings, () => { })
+}
 
 describe('SettingsForm.vue', () => {
-  let store: Record<string, string> = {}
+  let sdb: SettingsDatabase
 
-  beforeEach(() => {
-    // Мок для localStorage
-    vi.spyOn(window, 'localStorage', 'get').mockImplementation(() => ({
-      getItem: (key: string) => store[key] || null,
-      setItem: (key: string, value: string) => (store[key] = value.toString()),
-      removeItem: (key: string) => delete store[key],
-      clear: () => (store = {}),
-      length: Object.keys(store).length, // Добавляем свойство length
-      key: (index: number) => Object.keys(store)[index] || null, // Добавляем метод key
-    }))
+  beforeEach(async () => {
+    // Создаем новую базу данных для каждого теста
+    sdb = new SettingsDatabase()
 
-    // Очищаем localStorage перед каждым тестом
-    window.localStorage.clear()
+    // Инициализируем базу данных с настройками по умолчанию
+    await dbsInit()
   })
 
-  afterEach(() => {
+  afterEach(async () => {
+    // Закрываем базу данных после каждого теста
+    if (sdb && sdb.isOpen()) {
+      sdb.close()
+    }
+
     // Очищаем DOM после каждого теста
     cleanup()
   })
 
   it('Проверяем, что подписи тем отображаются правильно', async () => {
     const screen = render(SettingsForm)
+
     // Проверяем, что компонент отображает текст "Тема:"
     expect(screen.getByText('Тема:')).toBeTruthy()
+
     // Находим подпись для тёмной темы
-    expect(screen.getAllByText(/тёмная/).length).toBe(1)
+    const darkThemeLabelElements = screen.getAllByText(/тёмная/)
+    expect(darkThemeLabelElements.length).toBe(1)
+
     // Находим подпись для светлой темы
-    expect(screen.getAllByText(/светлая/).length).toBe(1)
+    const lightThemeLabelElements = screen.getAllByText(/светлая/)
+    expect(lightThemeLabelElements.length).toBe(1)
+
     // Проверяем, что тема по умолчанию — светлая
-    expect(window.localStorage.getItem('settings-storage')).toBe(
-      JSON.stringify({ theme: 'light' })
-    )
+    const settings = await sdb.settings.get(1)
+    expect(settings?.theme).toBe('light')
   })
 
-  it('Изменение темы при клике на кнопке "тёмная"', async () => {
+  it('Изменение темы при клике на подписи', async () => {
     const { getByText } = render(SettingsForm)
+
     // Нажимаем на кнопку "тёмная"
-    await fireEvent.click(getByText('тёмная'))
+    fireEvent.click(getByText('тёмная'))
+
+    await waitForDbUpdate(sdb)
+
     // Проверяем, что тема изменилась на "dark"
-    expect(window.localStorage.getItem('settings-storage')).toBe(
-      JSON.stringify({ theme: 'dark' })
-    )
+    let settings = await sdb.settings.get(1)
+    expect(settings?.theme).toBe('dark')
+
     // Нажимаем на кнопку "светлая"
-    await fireEvent.click(getByText('светлая'))
+    fireEvent.click(getByText('светлая'))
+
+    await waitForDbUpdate(sdb)
+
     // Проверяем, что тема изменилась на "light"
-    expect(window.localStorage.getItem('settings-storage')).toBe(
-      JSON.stringify({ theme: 'light' })
-    )
+    settings = await sdb.settings.get(1)
+    expect(settings?.theme).toBe('light')
   })
 })
